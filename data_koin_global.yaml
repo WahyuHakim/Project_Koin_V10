@@ -1,0 +1,13 @@
+path: ./dataset_koin_global
+train: images/train
+val: images/val
+
+names:
+  0: ID_IDR_100
+  1: ID_IDR_200
+  2: ID_IDR_500
+  3: ID_IDR_1000
+  4: US_USD_025
+  5: EU_EUR_100
+  6: JP_JPY_100
+  7: MY_MYR_050
