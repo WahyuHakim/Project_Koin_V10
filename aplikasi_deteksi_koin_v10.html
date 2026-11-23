@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deteksi Koin Dunia Multi-Sudut & Tumpukan (v10.0 True Peak Column Engine)</title>
+    <title>Deteksi Koin Dunia Multi-Sudut & Tumpukan (v10.2 Distance-Peak Engine)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -40,12 +40,12 @@
         <header class="glass-panel rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v10.0 True Peak Column & Rim Engine</span>
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v10.2 Distance-Peak & Rotated Ellipse Engine</span>
                     <span id="badgeSceneType" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30">Siap Menganalisis</span>
                     <span id="badgeBackendStatus" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-700/60 text-slate-300 border border-slate-600">Mode: Vision Engine Lokal (JS)</span>
                 </div>
                 <h1 class="text-xl md:text-2xl font-bold mt-2 text-white">Deteksi Jumlah, Jenis & Nilai Koin Dunia</h1>
-                <p class="text-slate-400 text-xs md:text-sm mt-1">Upgrade v10.0: Memperbaiki kolom hantu di celah antar tumpukan (1D Horizontal Projection Peaks), mengenali koin paling atas & miring, serta terintegrasi dengan Backend Python YOLOv8.</p>
+                <p class="text-slate-400 text-xs md:text-sm mt-1">Deteksi presisi 1-koin-1-elips untuk foto close-up, koin bersentuhan tepi, alas kain berwarna, maupun koin miring/oval.</p>
             </div>
             <div class="flex flex-wrap gap-2 w-full md:w-auto">
                 <label class="flex-1 md:flex-none justify-center cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-lg">
@@ -79,7 +79,7 @@
             <div class="glass-panel rounded-2xl p-4 border-l-4 border-amber-500">
                 <p class="text-xs text-amber-400 uppercase tracking-wider">Tidak Terklasifikasi</p>
                 <p id="statUnclassified" class="text-2xl md:text-3xl font-extrabold text-amber-400 mt-1">0 <span class="text-xs font-normal text-slate-400">keping</span></p>
-                <p class="text-[11px] text-slate-400 mt-1">Tertutup tumpukan / hanya tepi</p>
+                <p class="text-[11px] text-slate-400 mt-1">Koin oval/suvenir atau tertutup</p>
             </div>
             <div class="glass-panel rounded-2xl p-4 border-l-4 border-sky-500">
                 <p class="text-xs text-sky-400 uppercase tracking-wider">Total Nilai (Estimasi IDR)</p>
@@ -90,14 +90,14 @@
 
         <!-- Main Workspace -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <!-- Left Column: Visual Detection Canvas -->
+            <!-- Left Column -->
             <div class="lg:col-span-8 space-y-4">
                 <div class="glass-panel rounded-2xl p-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <h2 class="font-semibold text-white text-sm md:text-base">Kanvas Deteksi Multi-Sudut</h2>
                             <span class="text-xs px-2 py-0.5 rounded badge-classified">Hijau = Terklasifikasi</span>
-                            <span class="text-xs px-2 py-0.5 rounded badge-unclassified">Oranye = Tertutup / Tepi (Unclassified)</span>
+                            <span class="text-xs px-2 py-0.5 rounded badge-unclassified">Oranye = Oval / Tertutup (Unclassified)</span>
                         </div>
                         <span class="text-xs text-slate-400">Klik koin untuk ubah/geser ukuran</span>
                     </div>
@@ -107,23 +107,20 @@
                         <canvas id="mainCanvas" width="800" height="520"></canvas>
                     </div>
 
-                    <!-- Detection Hyperparameter Controls -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-800">
                         <div>
                             <div class="flex justify-between text-xs mb-1">
-                                <span class="text-slate-300">Mode Susunan Koin</span>
-                                <span id="lblMode" class="text-emerald-400 font-semibold">Otomatis Cerdas</span>
+                                <span class="text-slate-300">Mesin Pemrosesan</span>
+                                <span id="lblMode" class="text-emerald-400 font-semibold">Otomatis</span>
                             </div>
                             <select id="selectSceneMode" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs">
-                                <option value="AUTO">Otomatis (Deteksi Cerdas 3 Mode)</option>
-                                <option value="REGULAR">1. Koin Beraturan / Terpisah (1 Blob = 1 Koin)</option>
-                                <option value="TOWER_STACK">2. Menara Tumpukan Samping (Latar Terang)</option>
-                                <option value="IRREGULAR_PILE">3. Tumpukan Acak Padat (Multi-Scale Rim)</option>
+                                <option value="AUTO">Otomatis (Prioritas Backend Python)</option>
+                                <option value="LOCAL_EDT">Vision Engine Lokal (Distance-Peak JS)</option>
                             </select>
                         </div>
                         <div>
                             <div class="flex justify-between text-xs mb-1">
-                                <span class="text-slate-300">Sensitivitas Koin Tertutup</span>
+                                <span class="text-slate-300">Sensitivitas Segmentasi</span>
                                 <span id="lblSens" class="text-sky-400 font-semibold">55%</span>
                             </div>
                             <input type="range" id="sliderSens" min="20" max="90" value="55" class="w-full accent-sky-500">
@@ -140,9 +137,8 @@
                 </div>
             </div>
 
-            <!-- Right Column: Breakdown, Rectification Preview & Currency Catalog -->
+            <!-- Right Column -->
             <div class="lg:col-span-4 space-y-4">
-                <!-- Selected Coin Inspector -->
                 <div class="glass-panel rounded-2xl p-4">
                     <h3 class="font-semibold text-white text-sm mb-3 flex items-center justify-between">
                         <span>Inspeksi & Edit Koin Terpilih</span>
@@ -154,28 +150,27 @@
                             <div>
                                 <label class="block text-slate-400 mb-1">Jenis / Status Koin:</label>
                                 <select id="selectOverrideClass" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs">
-                                    <option value="UNCLASSIFIED">Tidak Terklasifikasi (Tertutup/Tepi)</option>
+                                    <option value="UNCLASSIFIED">Tidak Terklasifikasi (Oval/Tertutup)</option>
                                 </select>
                             </div>
                             <div>
                                 <div class="flex justify-between text-[11px] text-slate-400">
-                                    <span>Lebar Elips (rx)</span>
+                                    <span>Sumbu Panjang Elips (rx)</span>
                                     <span id="lblRx">55px</span>
                                 </div>
-                                <input type="range" id="sliderCoinRx" min="15" max="180" value="55" class="w-full accent-sky-400">
+                                <input type="range" id="sliderCoinRx" min="15" max="220" value="55" class="w-full accent-sky-400">
                             </div>
                             <div>
                                 <div class="flex justify-between text-[11px] text-slate-400">
-                                    <span>Tinggi Elips (ry - Sudut)</span>
+                                    <span>Sumbu Pendek Elips (ry)</span>
                                     <span id="lblRy">40px</span>
                                 </div>
-                                <input type="range" id="sliderCoinRy" min="6" max="180" value="40" class="w-full accent-sky-400">
+                                <input type="range" id="sliderCoinRy" min="6" max="220" value="40" class="w-full accent-sky-400">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Per-Coin Classification Breakdown Table -->
                 <div class="glass-panel rounded-2xl p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="font-semibold text-white text-sm">Rincian Per Jenis Koin & Status</h3>
@@ -196,14 +191,13 @@
                     </div>
                 </div>
 
-                <!-- Add New Country Coin Form -->
                 <div class="glass-panel rounded-2xl p-4">
                     <h3 class="font-semibold text-white text-sm mb-2">Tambah Katalog Koin Negara Baru</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        <input id="inpCountry" type="text" placeholder="Negara (cth: Arab Saudi)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-                        <input id="inpCurr" type="text" placeholder="Mata Uang (cth: SAR)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-                        <input id="inpNominal" type="number" step="any" placeholder="Nominal (cth: 1)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-                        <input id="inpRate" type="number" step="any" placeholder="Kurs ke IDR (cth: 4300)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="inpCountry" type="text" placeholder="Negara (cth: Amerika Serikat)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="inpCurr" type="text" placeholder="Mata Uang (cth: USD)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="inpNominal" type="number" step="any" placeholder="Nominal (cth: 0.01)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+                        <input id="inpRate" type="number" step="any" placeholder="Kurs ke IDR (cth: 16200)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
                     </div>
                     <button id="btnAddCatalog" class="mt-2.5 w-full bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/40 text-emerald-300 font-medium py-1.5 rounded-lg text-xs transition">
                         + Simpan ke Database Koin Dunia
@@ -233,13 +227,15 @@
         const rectCtx = rectCanvas.getContext("2d");
 
         let currentImage = null;
+        let currentImageFile = null;
+        let backendConnected = false;
         let detectedCoins = [];
         let selectedIndex = -1;
         let addingManualMode = false;
 
         function populateSelectOptions() {
             const sel = document.getElementById("selectOverrideClass");
-            sel.innerHTML = '<option value="UNCLASSIFIED">Tidak Terklasifikasi (Tertutup/Tepi)</option>';
+            sel.innerHTML = '<option value="UNCLASSIFIED">Tidak Terklasifikasi (Oval/Tertutup)</option>';
             Object.entries(COIN_CATALOG).forEach(([code, info]) => {
                 const opt = document.createElement("option");
                 opt.value = code;
@@ -252,55 +248,96 @@
         async function cekKoneksiBackend() {
             const badge = document.getElementById("badgeBackendStatus");
             try {
-                const res = await fetch(`${API_BASE_URL}/api/catalog`, { method: "GET" });
+                const res = await fetch(`${API_BASE_URL}/api/catalog`, { method: "GET", cache: "no-store" });
                 if (res.ok) {
-                    badge.textContent = "Backend Python: Terhubung (Port 5000)";
+                    backendConnected = true;
+                    const data = await res.json();
+                    if (data.katalog) {
+                        Object.entries(data.katalog).forEach(([k, v]) => {
+                            COIN_CATALOG[k] = {
+                                negara: v.negara,
+                                mata_uang: v.mata_uang,
+                                simbol: v.simbol,
+                                nominal: v.nominal,
+                                kurs_ke_idr: v.kurs_idr || v.kurs_ke_idr || 1.0
+                            };
+                        });
+                        populateSelectOptions();
+                    }
+                    badge.textContent = "Backend Python: Terhubung (v10.2 Active)";
                     badge.className = "px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40";
                 }
             } catch (_) {
-                badge.textContent = "Mode: Vision Engine Lokal (JS v10.0)";
+                backendConnected = false;
+                badge.textContent = "Mode: Vision Engine Lokal (v10.2 JS)";
             }
         }
         cekKoneksiBackend();
 
-        async function deteksiViaBackendPython() {
+        async function jalankanDeteksiOtomatis() {
+            if (!currentImage) return;
+            const w = 800;
+            const h = Math.max(260, Math.round((currentImage.height / currentImage.width) * 800));
+            mainCanvas.width = w;
+            mainCanvas.height = h;
+
+            const mode = document.getElementById("selectSceneMode").value;
+            if (mode === "AUTO" && backendConnected) {
+                await deteksiViaBackendPython(true);
+            } else {
+                detectCoinsDistancePeakJS(currentImage);
+            }
+        }
+
+        async function deteksiViaBackendPython(silentFallback = false) {
             if (!currentImage) {
                 alert("Unggah foto koin terlebih dahulu.");
                 return;
             }
-            const tempCanvas = document.createElement("canvas");
-            tempCanvas.width = mainCanvas.width;
-            tempCanvas.height = mainCanvas.height;
-            tempCanvas.getContext("2d").drawImage(currentImage, 0, 0, mainCanvas.width, mainCanvas.height);
-            const dataUrl = tempCanvas.toDataURL("image/jpeg", 0.92);
+
+            const sensVal = document.getElementById("sliderSens").value;
+            const formData = new FormData();
+            formData.append("canvas_w", mainCanvas.width);
+            formData.append("canvas_h", mainCanvas.height);
+            formData.append("sensitivitas", sensVal);
 
             try {
-                document.getElementById("badgeSceneType").textContent = "Memproses via Python YOLOv8 Backend...";
+                document.getElementById("badgeSceneType").textContent = "Memproses via Python OpenCV Distance-Peak...";
+
+                if (currentImageFile) {
+                    formData.append("image", currentImageFile);
+                } else {
+                    const tempCanvas = document.createElement("canvas");
+                    tempCanvas.width = currentImage.videoWidth || mainCanvas.width;
+                    tempCanvas.height = currentImage.videoHeight || mainCanvas.height;
+                    tempCanvas.getContext("2d").drawImage(currentImage, 0, 0, tempCanvas.width, tempCanvas.height);
+                    const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, "image/jpeg", 0.95));
+                    formData.append("image", blob, "capture.jpg");
+                }
+
                 const res = await fetch(`${API_BASE_URL}/api/detect`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        image_base64: dataUrl,
-                        canvas_w: mainCanvas.width,
-                        canvas_h: mainCanvas.height
-                    })
+                    body: formData
                 });
                 const json = await res.json();
                 if (json.status === "ok" && json.laporan && Array.isArray(json.laporan.daftar_koin)) {
                     detectedCoins = json.laporan.daftar_koin;
                     selectedIndex = detectedCoins.length > 0 ? 0 : -1;
-                    document.getElementById("badgeSceneType").textContent = "Mode Aktif: Inferensi Python YOLOv8-Seg Terintegrasi";
+                    document.getElementById("badgeSceneType").textContent =
+                        `Aktif: ${json.laporan.engine_digunakan || "Python API"}`;
                     renderScene();
                 } else {
                     throw new Error("Respons tidak valid");
                 }
             } catch (err) {
-                alert("Server Python belum aktif di http://127.0.0.1:5000. Menggunakan Tri-Mode Vision Engine v10.0 lokal.");
-                detectCoinsV10(currentImage);
+                if (!silentFallback) {
+                    alert("Server Python tidak merespons. Beralih ke Vision Engine Lokal v10.2.");
+                }
+                detectCoinsDistancePeakJS(currentImage);
             }
         }
 
-        function detectCoinsV10(img) {
+        function detectCoinsDistancePeakJS(img) {
             const w = 800;
             const h = Math.max(260, Math.round((img.height / img.width) * 800));
             mainCanvas.width = w;
@@ -315,59 +352,58 @@
             const imgData = tCtx.getImageData(0, 0, w, h).data;
             const sw = Math.floor(w / 2);
             const sh = Math.floor(h / 2);
+            const sensVal = parseInt(document.getElementById("sliderSens").value, 10);
 
-            let brightBorderPixels = 0;
-            let totalBorderPixels = 0;
-            const borderColors = [];
+            // 1. Cari warna latar dominan (mode terkuantisasi) dari tepi gambar
+            const binCounts = new Map();
+            const binSums = new Map();
+            const addBorderSample = (r, g, b) => {
+                const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+                binCounts.set(key, (binCounts.get(key) || 0) + 1);
+                const s = binSums.get(key) || [0, 0, 0];
+                s[0] += r; s[1] += g; s[2] += b;
+                binSums.set(key, s);
+            };
 
-            for (let x = 2; x < sw - 2; x += 3) {
-                const iTop = (2 * 2 * w + x * 2) * 4;
-                const iBot = (((sh - 3) * 2) * w + x * 2) * 4;
-                const lumTop = 0.299 * imgData[iTop] + 0.587 * imgData[iTop + 1] + 0.114 * imgData[iTop + 2];
-                const lumBot = 0.299 * imgData[iBot] + 0.587 * imgData[iBot + 1] + 0.114 * imgData[iBot + 2];
-                if (lumTop > 195) brightBorderPixels++;
-                if (lumBot > 195) brightBorderPixels++;
-                totalBorderPixels += 2;
-                borderColors.push([imgData[iTop], imgData[iTop + 1], imgData[iTop + 2]]);
-                borderColors.push([imgData[iBot], imgData[iBot + 1], imgData[iBot + 2]]);
+            for (let x = 0; x < sw; x++) {
+                for (let y of [1, 2, sh - 3, sh - 2]) {
+                    const idx = ((y * 2) * w + (x * 2)) * 4;
+                    addBorderSample(imgData[idx], imgData[idx + 1], imgData[idx + 2]);
+                }
             }
-            for (let y = 2; y < sh - 2; y += 3) {
-                const iLeft = (y * 2 * w + 4) * 4;
-                const iRight = (y * 2 * w + (w - 6)) * 4;
-                const lumLeft = 0.299 * imgData[iLeft] + 0.587 * imgData[iLeft + 1] + 0.114 * imgData[iLeft + 2];
-                const lumRight = 0.299 * imgData[iRight] + 0.587 * imgData[iRight + 1] + 0.114 * imgData[iRight + 2];
-                if (lumLeft > 195) brightBorderPixels++;
-                if (lumRight > 195) brightBorderPixels++;
-                totalBorderPixels += 2;
+            for (let y = 0; y < sh; y++) {
+                for (let x of [1, 2, sw - 3, sw - 2]) {
+                    const idx = ((y * 2) * w + (x * 2)) * 4;
+                    addBorderSample(imgData[idx], imgData[idx + 1], imgData[idx + 2]);
+                }
             }
 
-            const brightBorderRatio = brightBorderPixels / (totalBorderPixels || 1);
-            borderColors.sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
-            const medBg = borderColors[Math.floor(borderColors.length * 0.72)];
+            let bestKey = 0, maxCnt = -1;
+            binCounts.forEach((cnt, key) => {
+                if (cnt > maxCnt) { maxCnt = cnt; bestKey = key; }
+            });
+            const bestSum = binSums.get(bestKey) || [200, 200, 200];
+            const medBg = [bestSum[0] / maxCnt, bestSum[1] / maxCnt, bestSum[2] / maxCnt];
 
             const rawBg = new Uint8Array(sw * sh);
             const satMap = new Float32Array(sw * sh);
-            const lumMap = new Float32Array(sw * sh);
-            const yellowRatioMap = new Float32Array(sw * sh);
+            const yellowMap = new Float32Array(sw * sh);
+            const bgTol = Math.max(24, 52 - Math.round(sensVal * 0.32));
 
             for (let y = 0; y < sh; y++) {
                 for (let x = 0; x < sw; x++) {
                     const idx = ((y * 2) * w + (x * 2)) * 4;
                     const r = imgData[idx], g = imgData[idx + 1], b = imgData[idx + 2];
-                    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                    lumMap[y * sw + x] = lum;
-
                     const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
                     satMap[y * sw + x] = maxC === 0 ? 0 : ((maxC - minC) / maxC) * 255;
-                    yellowRatioMap[y * sw + x] = Math.max(0, (r + g) * 0.5 - b);
+                    yellowMap[y * sw + x] = Math.max(0, (r + g) * 0.5 - b);
 
                     const distBg = Math.hypot(r - medBg[0], g - medBg[1], b - medBg[2]);
-                    if (distBg <= 40 || lum >= 238 || (lum >= 210 && satMap[y * sw + x] < 16)) {
-                        rawBg[y * sw + x] = 1;
-                    }
+                    if (distBg <= bgTol) rawBg[y * sw + x] = 1;
                 }
             }
 
+            // 2. Exterior Flood-Fill untuk menutup lubang relief & kilau logam di dalam koin
             const extBg = new Uint8Array(sw * sh);
             const qBg = [];
             for (let x = 0; x < sw; x++) {
@@ -381,533 +417,147 @@
                 const right = y * sw + (sw - 1);
                 if (rawBg[right]) { extBg[right] = 1; qBg.push(right); }
             }
-
             while (qBg.length > 0) {
                 const curr = qBg.pop();
-                const cy = Math.floor(curr / sw);
-                const cx = curr % sw;
+                const cy = Math.floor(curr / sw), cx = curr % sw;
                 if (cx > 0 && rawBg[curr - 1] && !extBg[curr - 1]) { extBg[curr - 1] = 1; qBg.push(curr - 1); }
                 if (cx < sw - 1 && rawBg[curr + 1] && !extBg[curr + 1]) { extBg[curr + 1] = 1; qBg.push(curr + 1); }
                 if (cy > 0 && rawBg[curr - sw] && !extBg[curr - sw]) { extBg[curr - sw] = 1; qBg.push(curr - sw); }
                 if (cy < sh - 1 && rawBg[curr + sw] && !extBg[curr + sw]) { extBg[curr + sw] = 1; qBg.push(curr + sw); }
             }
 
-            const fgMask = new Uint8Array(sw * sh);
-            let totalFgPixels = 0;
+            // 3. 2-Pass Distance Transform untuk menghitung jarak tiap piksel koin ke tepi luarnya
+            const distMap = new Float32Array(sw * sh);
+            const INF = 1e5;
             for (let i = 0; i < sw * sh; i++) {
-                if (extBg[i] === 0) {
-                    fgMask[i] = 1;
-                    totalFgPixels++;
-                }
+                distMap[i] = extBg[i] === 0 ? INF : 0;
             }
-            const fgCoverage = totalFgPixels / (sw * sh);
-
-            const visited = new Uint8Array(sw * sh);
-            const blobs = [];
-            const minBlobArea = Math.max(150, Math.floor((sw * sh) * 0.004));
-
-            for (let y = 1; y < sh - 1; y++) {
+            for (let y = 1; y < sh; y++) {
                 for (let x = 1; x < sw - 1; x++) {
-                    const start = y * sw + x;
-                    if (fgMask[start] === 1 && visited[start] === 0) {
-                        const q = [start];
-                        visited[start] = 1;
-                        let minX = x, maxX = x, minY = y, maxY = y;
-                        let area = 0, sumSat = 0, sumYellow = 0;
+                    const i = y * sw + x;
+                    if (distMap[i] > 0) {
+                        distMap[i] = Math.min(
+                            distMap[i],
+                            distMap[i - 1] + 1,
+                            distMap[i - sw] + 1,
+                            distMap[i - sw - 1] + 1.414,
+                            distMap[i - sw + 1] + 1.414
+                        );
+                    }
+                }
+            }
+            for (let y = sh - 2; y >= 0; y--) {
+                for (let x = sw - 2; x >= 1; x--) {
+                    const i = y * sw + x;
+                    if (distMap[i] > 0) {
+                        distMap[i] = Math.min(
+                            distMap[i],
+                            distMap[i + 1] + 1,
+                            distMap[i + sw] + 1,
+                            distMap[i + sw - 1] + 1.414,
+                            distMap[i + sw + 1] + 1.414
+                        );
+                    }
+                }
+            }
 
-                        while (q.length > 0) {
-                            const curr = q.pop();
-                            const cy = Math.floor(curr / sw);
-                            const cx = curr % sw;
-                            area++;
-                            sumSat += satMap[curr];
-                            sumYellow += yellowRatioMap[curr];
+            // 4. Cari Puncak Lokal (Pusat Koin) dengan Non-Maximum Suppression berbasis radius
+            const minCoinR = Math.max(14, Math.min(sw, sh) * 0.055);
+            const candidates = [];
+            for (let y = 2; y < sh - 2; y++) {
+                for (let x = 2; x < sw - 2; x++) {
+                    const d = distMap[y * sw + x];
+                    if (d >= minCoinR) {
+                        candidates.push({ x, y, r: d });
+                    }
+                }
+            }
+            candidates.sort((a, b) => b.r - a.r);
 
-                            if (cx < minX) minX = cx;
-                            if (cx > maxX) maxX = cx;
-                            if (cy < minY) minY = cy;
-                            if (cy > maxY) maxY = cy;
+            const peaks = [];
+            for (let c of candidates) {
+                const tooClose = peaks.some(p => Math.hypot(p.x - c.x, p.y - c.y) < Math.max(p.r, c.r) * 0.92);
+                if (!tooClose) {
+                    peaks.push(c);
+                }
+            }
 
-                            const nb = [curr - 1, curr + 1, curr - sw, curr + sw];
-                            for (let n of nb) {
-                                if (n >= 0 && n < sw * sh && fgMask[n] === 1 && visited[n] === 0) {
-                                    visited[n] = 1;
-                                    q.push(n);
-                                }
+            // 5. Hitung Momen Orde-2 untuk setiap koin (mendapatkan bentuk oval miring & diameter akurat)
+            const blobs = peaks.map(p => ({
+                ptsX: [], ptsY: [], sumSat: 0, sumYel: 0, peakR: p.r
+            }));
+
+            for (let y = 0; y < sh; y++) {
+                for (let x = 0; x < sw; x++) {
+                    if (extBg[y * sw + x] === 0 && peaks.length > 0) {
+                        let bestIdx = -1, bestDist = INF;
+                        for (let i = 0; i < peaks.length; i++) {
+                            const d = Math.hypot(x - peaks[i].x, y - peaks[i].y);
+                            if (d < bestDist && d <= peaks[i].r * 1.28) {
+                                bestDist = d;
+                                bestIdx = i;
                             }
                         }
-
-                        if (area >= minBlobArea) {
-                            const bw = maxX - minX + 1;
-                            const bh = maxY - minY + 1;
-                            const ellipseArea = Math.PI * (bw / 2) * (bh / 2);
-                            const solidity = area / (ellipseArea + 1e-5);
-                            blobs.push({
-                                minX, maxX, minY, maxY, bw, bh, area,
-                                solidity,
-                                aspect: Math.min(bw, bh) / Math.max(bw, bh),
-                                avgSat: sumSat / area,
-                                avgYellow: sumYellow / area
-                            });
+                        if (bestIdx >= 0) {
+                            blobs[bestIdx].ptsX.push(x);
+                            blobs[bestIdx].ptsY.push(y);
+                            blobs[bestIdx].sumSat += satMap[y * sw + x];
+                            blobs[bestIdx].sumYel += yellowMap[y * sw + x];
                         }
                     }
                 }
             }
 
-            const userMode = document.getElementById("selectSceneMode").value;
-            let activeMode = userMode;
+            const hasil = [];
+            for (let b of blobs) {
+                const n = b.ptsX.length;
+                if (n < 40) continue;
+                let mx = 0, my = 0;
+                for (let k = 0; k < n; k++) { mx += b.ptsX[k]; my += b.ptsY[k]; }
+                mx /= n; my /= n;
 
-            if (userMode === "AUTO") {
-                const maxSingleBlobRatio = blobs.length > 0 ? Math.max(...blobs.map(b => b.area)) / (sw * sh) : 0;
-                const cleanCircularBlobs = blobs.filter(b => b.aspect >= 0.65 && b.solidity >= 0.68 && (b.area / (sw * sh)) < 0.20);
-
-                if (brightBorderRatio < 0.35 || fgCoverage > 0.72) {
-                    activeMode = "IRREGULAR_PILE";
-                } else if (blobs.length >= 2 && cleanCircularBlobs.length >= blobs.length * 0.72 && maxSingleBlobRatio < 0.22) {
-                    activeMode = "REGULAR";
-                } else {
-                    activeMode = "TOWER_STACK";
+                let u20 = 0, u02 = 0, u11 = 0;
+                for (let k = 0; k < n; k++) {
+                    const dx = b.ptsX[k] - mx, dy = b.ptsY[k] - my;
+                    u20 += dx * dx; u02 += dy * dy; u11 += dx * dy;
                 }
-            }
+                u20 /= n; u02 /= n; u11 /= n;
 
-            const modeTitles = {
-                "REGULAR": "Mode Aktif: 1. Koin Beraturan (Presisi 1 Blob = 1 Koin Utuh)",
-                "TOWER_STACK": "Mode Aktif: 2. Menara Tumpukan Samping (True Peak Column Lock)",
-                "IRREGULAR_PILE": "Mode Aktif: 3. Tumpukan Acak Padat (Multi-Scale Rim Detector)"
-            };
-            document.getElementById("badgeSceneType").textContent = modeTitles[activeMode];
+                const common = Math.sqrt(4 * u11 * u11 + Math.pow(u20 - u02, 2));
+                const l1 = Math.max(1, (u20 + u02 + common) / 2);
+                const l2 = Math.max(1, (u20 + u02 - common) / 2);
+                const angle = 0.5 * Math.atan2(2 * u11, u20 - u02);
 
-            let finalCoins = [];
-            const sensVal = parseInt(document.getElementById("sliderSens").value, 10);
+                const rx = Math.round(2 * Math.sqrt(l1) * 2);
+                const ry = Math.round(2 * Math.sqrt(l2) * 2);
 
-            if (activeMode === "REGULAR" && blobs.length > 0) {
-                blobs.sort((a, b) => (Math.abs(a.minY - b.minY) < 35 ? a.minX - b.minX : a.minY - b.minY));
-                const maxDiam = Math.max(...blobs.map(b => Math.max(b.bw, b.bh)));
-
-                finalCoins = blobs.map(b => {
-                    const cx = ((b.minX + b.maxX) / 2) * 2;
-                    const cy = ((b.minY + b.maxY) / 2) * 2;
-                    const rx = Math.round((b.bw / 2) * 2);
-                    const ry = Math.round((b.bh / 2) * 2);
-                    const rel = Math.max(b.bw, b.bh) / maxDiam;
-
-                    let code = "ID_IDR_500";
-                    if (b.avgSat > 42 || b.avgYellow > 18) {
-                        code = "ID_IDR_1000";
-                    } else if (rel >= 0.93) {
-                        code = "ID_IDR_500";
-                    } else if (rel >= 0.84) {
-                        code = "ID_IDR_200";
-                    } else {
-                        code = "ID_IDR_100";
-                    }
-
-                    return { x: Math.round(cx), y: Math.round(cy), rx, ry, code };
-                });
-            }
-            else if (activeMode === "TOWER_STACK") {
-                const gradMag = new Float32Array(sw * sh);
-                const gradX = new Float32Array(sw * sh);
-                const gradY = new Float32Array(sw * sh);
-
-                for (let y = 1; y < sh - 1; y++) {
-                    for (let x = 1; x < sw - 1; x++) {
-                        const gx = lumMap[y * sw + (x + 1)] - lumMap[y * sw + (x - 1)];
-                        const gy = lumMap[(y + 1) * sw + x] - lumMap[(y - 1) * sw + x];
-                        const mag = Math.hypot(gx, gy);
-                        gradMag[y * sw + x] = mag;
-                        if (mag > 0.001) {
-                            gradX[y * sw + x] = gx / mag;
-                            gradY[y * sw + x] = gy / mag;
-                        }
-                    }
-                }
-
-                const rawColHeight = new Float32Array(sw);
-                const colTopY = new Int32Array(sw).fill(sh);
-                const colBotY = new Int32Array(sw).fill(0);
-
-                for (let x = 8; x < sw - 8; x++) {
-                    let cnt = 0;
-                    for (let y = 6; y < sh - 6; y++) {
-                        if (fgMask[y * sw + x] === 1) {
-                            cnt++;
-                            if (y < colTopY[x]) colTopY[x] = y;
-                            if (y > colBotY[x]) colBotY[x] = y;
-                        }
-                    }
-                    rawColHeight[x] = cnt;
-                }
-
-                const smoothCol = new Float32Array(sw);
-                const winW = 22;
-                for (let x = winW; x < sw - winW; x++) {
-                    let sum = 0;
-                    for (let dx = -winW; dx <= winW; dx++) {
-                        sum += rawColHeight[x + dx];
-                    }
-                    smoothCol[x] = sum / (winW * 2 + 1);
-                }
-
-                const towerPeaksX = [];
-                for (let x = 30; x < sw - 30; x++) {
-                    if (smoothCol[x] > 32 && smoothCol[x] >= smoothCol[x - 1] && smoothCol[x] >= smoothCol[x + 1]) {
-                        towerPeaksX.push({ x: x, strength: smoothCol[x] });
-                    }
-                }
-                towerPeaksX.sort((a, b) => b.strength - a.strength);
-
-                const trueTowers = [];
-                for (let p of towerPeaksX) {
-                    if (!trueTowers.some(t => Math.abs(t.x - p.x) < 72) && trueTowers.length < 3) {
-                        trueTowers.push(p);
-                    }
-                }
-                trueTowers.sort((a, b) => a.x - b.x);
-
-                const cosT = [], sinT = [];
-                const numAngles = 20;
-                for (let a = 0; a < numAngles; a++) {
-                    cosT.push(Math.cos((a * 2 * Math.PI) / numAngles));
-                    sinT.push(Math.sin((a * 2 * Math.PI) / numAngles));
-                }
-
-                const frontCandidates = [];
-                const testShapes = [
-                    { rx: 52, ry: 48, type: "FRONT_FACE" },
-                    { rx: 46, ry: 43, type: "FRONT_FACE" },
-                    { rx: 46, ry: 25, type: "TILTED_FACE" }
-                ];
-
-                for (let shape of testShapes) {
-                    for (let cy = shape.ry + 10; cy < sh - shape.ry - 6; cy += 5) {
-                        for (let cx = shape.rx + 10; cx < sw - shape.rx - 10; cx += 5) {
-                            if (fgMask[cy * sw + cx] === 0) continue;
-                            let hits = 0, score = 0;
-                            for (let a = 0; a < numAngles; a++) {
-                                const px = Math.round(cx + shape.rx * cosT[a]);
-                                const py = Math.round(cy + shape.ry * sinT[a]);
-                                if (px >= 2 && px < sw - 2 && py >= 2 && py < sh - 2) {
-                                    const mag = gradMag[py * sw + px];
-                                    if (mag > 16) {
-                                        const align = Math.abs(gradX[py * sw + px] * cosT[a] + gradY[py * sw + px] * sinT[a]);
-                                        if (align > 0.58) {
-                                            hits++;
-                                            score += mag * align;
-                                        }
-                                    }
-                                }
-                            }
-                            const ratio = hits / numAngles;
-                            if (ratio >= 0.55) {
-                                frontCandidates.push({
-                                    x: cx * 2,
-                                    y: cy * 2,
-                                    rx: shape.rx * 2,
-                                    ry: shape.ry * 2,
-                                    score: score * ratio,
-                                    type: shape.type
-                                });
-                            }
-                        }
-                    }
-                }
-
-                frontCandidates.sort((a, b) => b.score - a.score);
-                const confirmedFrontCoins = [];
-                for (let fc of frontCandidates) {
-                    const overlap = confirmedFrontCoins.some(e => Math.hypot(e.x - fc.x, e.y - fc.y) < 110);
-                    if (!overlap && confirmedFrontCoins.length < 3) {
-                        confirmedFrontCoins.push(fc);
-                    }
-                }
-
-                const minSliceSpacing = Math.max(9, Math.round(18 - (sensVal * 0.10)));
-                const gradThreshold = Math.max(8, 25 - (sensVal * 0.16));
-
-                trueTowers.forEach((tower) => {
-                    const tx = tower.x;
-                    const realX = tx * 2;
-
-                    let localTopY = sh, localBotY = 0;
-                    for (let dx = -12; dx <= 12; dx += 3) {
-                        const px = Math.min(sw - 1, Math.max(0, tx + dx));
-                        if (colTopY[px] < localTopY) localTopY = colTopY[px];
-                        if (colBotY[px] > localBotY) localBotY = colBotY[px];
-                    }
-
-                    const isCoveredByVerticalFrontCoin = confirmedFrontCoins.some(fc =>
-                        fc.type === "FRONT_FACE" && Math.abs(fc.x - realX) < 75 && Math.abs(fc.y - ((localTopY + localBotY) * 1.0)) < 75
-                    );
-
-                    let sliceStartY = localTopY + 6;
-
-                    if (!isCoveredByVerticalFrontCoin) {
-                        const topCapRx = 82;
-                        const topCapRy = 34;
-                        const topCapCenterY = (localTopY * 2) + topCapRy + 2;
-
-                        const hitsFront = confirmedFrontCoins.some(fc => Math.hypot(fc.x - realX, fc.y - topCapCenterY) < 80);
-                        if (!hitsFront) {
-                            finalCoins.push({
-                                x: realX,
-                                y: topCapCenterY,
-                                rx: topCapRx,
-                                ry: topCapRy,
-                                code: "ID_IDR_500",
-                                isStackSlice: false
-                            });
-                            sliceStartY = Math.round((topCapCenterY + topCapRy * 0.75) / 2);
-                        }
-                    }
-
-                    const profile = new Float32Array(sh);
-                    for (let y = sliceStartY; y < localBotY - 3; y++) {
-                        let sumGy = 0, validPx = 0;
-                        for (let dx = -15; dx <= 15; dx += 3) {
-                            const px = tx + dx;
-                            if (px >= 2 && px < sw - 2 && fgMask[y * sw + px] === 1) {
-                                const gy = Math.abs(lumMap[(y + 1) * sw + px] - lumMap[(y - 1) * sw + px]);
-                                const gx = Math.abs(lumMap[y * sw + (px + 1)] - lumMap[y * sw + (px - 1)]);
-                                if (gy > gx * 1.18) {
-                                    sumGy += gy;
-                                    validPx++;
-                                }
-                            }
-                        }
-                        profile[y] = validPx >= 4 ? (sumGy / validPx) : 0;
-                    }
-
-                    let lastPeakY = -999;
-                    let slicesCount = 0;
-
-                    for (let y = sliceStartY; y < localBotY - 3; y++) {
-                        const val = profile[y];
-                        if (val >= gradThreshold && val >= profile[y - 1] && val >= profile[y + 1]) {
-                            if (y - lastPeakY >= minSliceSpacing && slicesCount < 9) {
-                                const realY = y * 2;
-
-                                const insideFront = confirmedFrontCoins.some(fc => {
-                                    const dx = Math.abs(fc.x - realX);
-                                    const dy = Math.abs(fc.y - realY);
-                                    return dx < fc.rx * 0.82 && dy < fc.ry * 0.82;
-                                });
-
-                                if (!insideFront) {
-                                    finalCoins.push({
-                                        x: realX,
-                                        y: realY,
-                                        rx: 76,
-                                        ry: 14,
-                                        code: "UNCLASSIFIED",
-                                        isStackSlice: true
-                                    });
-                                    lastPeakY = y;
-                                    slicesCount++;
-                                }
-                            }
-                        }
-                    }
-                });
-
-                confirmedFrontCoins.forEach(fc => {
-                    const tooCloseToExistingFace = finalCoins.some(existing =>
-                        !existing.isStackSlice && Math.hypot(existing.x - fc.x, existing.y - fc.y) < 85
-                    );
-                    if (!tooCloseToExistingFace) {
-                        finalCoins.push({
-                            x: fc.x,
-                            y: fc.y,
-                            rx: fc.rx,
-                            ry: fc.ry,
-                            code: fc.type === "FRONT_FACE" ? "ID_IDR_500" : "ID_IDR_200",
-                            isStackSlice: false
-                        });
-                    }
-                });
-
-                finalCoins.sort((a, b) => (Math.abs(a.x - b.x) < 85 ? a.y - b.y : a.x - b.x));
-            }
-            else {
-                const smoothLum = new Float32Array(sw * sh);
-                for (let y = 1; y < sh - 1; y++) {
-                    for (let x = 1; x < sw - 1; x++) {
-                        let sum = 0;
-                        for (let dy = -1; dy <= 1; dy++) {
-                            for (let dx = -1; dx <= 1; dx++) {
-                                sum += lumMap[(y + dy) * sw + (x + dx)];
-                            }
-                        }
-                        smoothLum[y * sw + x] = sum / 9.0;
-                    }
-                }
-
-                const gradMag = new Float32Array(sw * sh);
-                const gradX = new Float32Array(sw * sh);
-                const gradY = new Float32Array(sw * sh);
-
-                for (let y = 2; y < sh - 2; y++) {
-                    for (let x = 2; x < sw - 2; x++) {
-                        const gx = (
-                            -smoothLum[(y - 1) * sw + (x - 1)] + smoothLum[(y - 1) * sw + (x + 1)] +
-                            -2 * smoothLum[y * sw + (x - 1)] + 2 * smoothLum[y * sw + (x + 1)] +
-                            -smoothLum[(y + 1) * sw + (x - 1)] + smoothLum[(y + 1) * sw + (x + 1)]
-                        ) / 4.0;
-                        const gy = (
-                            -smoothLum[(y - 1) * sw + (x - 1)] - 2 * smoothLum[(y - 1) * sw + x] - smoothLum[(y - 1) * sw + (x + 1)] +
-                             smoothLum[(y + 1) * sw + (x - 1)] + 2 * smoothLum[(y + 1) * sw + x] + smoothLum[(y + 1) * sw + (x + 1)]
-                        ) / 4.0;
-
-                        const mag = Math.hypot(gx, gy);
-                        gradMag[y * sw + x] = mag;
-                        if (mag > 0.001) {
-                            gradX[y * sw + x] = gx / mag;
-                            gradY[y * sw + x] = gy / mag;
-                        }
-                    }
-                }
-
-                const baseDim = Math.min(sw, sh);
-                const minR = Math.max(20, Math.round(baseDim * 0.11));
-                const maxR = Math.round(baseDim * 0.19);
-                const stepR = Math.max(4, Math.round((maxR - minR) / 4));
-
-                const numSamples = 24;
-                const cosT = [], sinT = [], sectorIdx = [];
-                for (let i = 0; i < numSamples; i++) {
-                    const ang = (i * 2 * Math.PI) / numSamples;
-                    cosT.push(Math.cos(ang));
-                    sinT.push(Math.sin(ang));
-                    sectorIdx.push(Math.floor(i / 3));
-                }
-
-                const candidates = [];
-                const aspectRatios = [0.92, 0.78];
-
-                for (let r = minR; r <= maxR; r += stepR) {
-                    for (let aspect of aspectRatios) {
-                        const ry = Math.round(r * aspect);
-                        const marginX = Math.round(r * 0.55);
-                        const marginY = Math.round(ry * 0.55);
-
-                        for (let cy = marginY; cy < sh - marginY; cy += 4) {
-                            for (let cx = marginX; cx < sw - marginX; cx += 4) {
-                                let totalWeightedScore = 0;
-                                let hits = 0;
-                                const sectorActive = [0, 0, 0, 0, 0, 0, 0, 0];
-
-                                for (let i = 0; i < numSamples; i++) {
-                                    const px = Math.round(cx + r * cosT[i]);
-                                    const py = Math.round(cy + ry * sinT[i]);
-
-                                    if (px >= 2 && px < sw - 2 && py >= 2 && py < sh - 2) {
-                                        const mag = gradMag[py * sw + px];
-                                        if (mag > 14) {
-                                            const nx = cosT[i] / r;
-                                            const ny = sinT[i] / ry;
-                                            const nLen = Math.hypot(nx, ny);
-                                            const align = Math.abs((gradX[py * sw + px] * nx + gradY[py * sw + px] * ny) / nLen);
-
-                                            if (align > 0.62) {
-                                                totalWeightedScore += mag * align;
-                                                hits++;
-                                                sectorActive[sectorIdx[i]]++;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                const activeSectorsCount = sectorActive.filter(s => s >= 1).length;
-                                const hitRatio = hits / numSamples;
-
-                                if (activeSectorsCount >= 4 && hitRatio >= 0.35) {
-                                    let sumSat = 0, sumYel = 0, cnt = 0;
-                                    for (let dy = -4; dy <= 4; dy += 2) {
-                                        for (let dx = -4; dx <= 4; dx += 2) {
-                                            const iy = Math.min(sh - 1, Math.max(0, cy + dy));
-                                            const ix = Math.min(sw - 1, Math.max(0, cx + dx));
-                                            sumSat += satMap[iy * sw + ix];
-                                            sumYel += yellowRatioMap[iy * sw + ix];
-                                            cnt++;
-                                        }
-                                    }
-
-                                    const completenessBonus = activeSectorsCount >= 6 ? 1.45 : 1.0;
-                                    candidates.push({
-                                        x: cx * 2,
-                                        y: cy * 2,
-                                        rx: r * 2,
-                                        ry: ry * 2,
-                                        score: (totalWeightedScore / numSamples) * hitRatio * completenessBonus * activeSectorsCount,
-                                        hitRatio: hitRatio,
-                                        sectors: activeSectorsCount,
-                                        avgSat: sumSat / cnt,
-                                        avgYellow: sumYel / cnt
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                candidates.sort((a, b) => b.score - a.score);
-                const maxTarget = Math.round(16 + (sensVal * 0.34));
-                const picked = [];
-
-                for (let c of candidates) {
-                    let tooClose = false;
-                    let maxOverlapRatio = 0;
-
-                    for (let p of picked) {
-                        const dist = Math.hypot(p.x - c.x, p.y - c.y);
-                        const meanR = (p.rx + c.rx) * 0.5;
-                        if (dist < meanR * 0.56) {
-                            tooClose = true;
-                            break;
-                        }
-                        if (dist < meanR * 0.95) {
-                            const overlap = 1.0 - (dist / (meanR * 0.95));
-                            if (overlap > maxOverlapRatio) maxOverlapRatio = overlap;
-                        }
-                    }
-
-                    if (!tooClose && picked.length < maxTarget) {
-                        c.occlusionRatio = maxOverlapRatio;
-                        picked.push(c);
-                    }
-                }
-
-                picked.sort((a, b) => (Math.abs(a.y - b.y) < 45 ? a.x - b.x : a.y - b.y));
-                const maxPickedR = picked.length > 0 ? Math.max(...picked.map(c => c.rx)) : 1;
-
-                finalCoins = picked.map(c => {
-                    const rel = c.rx / maxPickedR;
-                    const isTopVisibleCoin = (c.sectors >= 6 || c.hitRatio >= 0.50) && c.occlusionRatio < 0.32;
-                    let code = "UNCLASSIFIED";
-
-                    if (isTopVisibleCoin) {
-                        if (c.avgSat > 46 || c.avgYellow > 20) {
-                            code = "ID_IDR_1000";
-                        } else if (rel >= 0.90) {
-                            code = "ID_IDR_500";
-                        } else if (rel >= 0.80) {
-                            code = "ID_IDR_200";
-                        } else {
-                            code = "ID_IDR_100";
-                        }
-                    }
-
-                    return {
-                        x: c.x,
-                        y: c.y,
-                        rx: c.rx,
-                        ry: c.ry,
-                        code: code
-                    };
+                hasil.push({
+                    x: Math.round(mx * 2),
+                    y: Math.round(my * 2),
+                    rx, ry, angle,
+                    aspect: ry / (rx + 1e-5),
+                    avgSat: b.sumSat / n,
+                    avgYel: b.sumYel / n
                 });
             }
 
-            detectedCoins = finalCoins;
+            hasil.sort((a, b) => (Math.abs(a.y - b.y) < 70 ? a.x - b.x : a.y - b.y));
+            const circ = hasil.filter(c => c.aspect >= 0.76);
+            const maxR = circ.length > 0 ? Math.max(...circ.map(c => c.rx)) : 1;
+
+            detectedCoins = hasil.map(c => {
+                let code = "UNCLASSIFIED";
+                if (c.aspect >= 0.76) {
+                    const rel = c.rx / maxR;
+                    if (c.avgSat > 45 || c.avgYel > 20) code = "ID_IDR_500";
+                    else if (rel >= 0.93) code = "ID_IDR_500";
+                    else if (rel >= 0.83) code = "ID_IDR_1000";
+                    else code = "ID_IDR_100";
+                }
+                return { x: c.x, y: c.y, rx: c.rx, ry: c.ry, angle: c.angle, code };
+            });
+
+            document.getElementById("badgeSceneType").textContent = "Aktif: Vision Engine Lokal (Distance-Peak v10.2)";
             selectedIndex = detectedCoins.length > 0 ? 0 : -1;
             renderScene();
         }
@@ -926,16 +576,12 @@
                 ctx.fillStyle = "#94a3b8";
                 ctx.font = "15px Inter, sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText("Unggah foto koin Anda (otomatis mengenali Koin Beraturan, Menara Samping, dan Tumpukan Acak)", mainCanvas.width / 2, mainCanvas.height / 2);
+                ctx.fillText("Unggah foto koin Anda untuk memulai deteksi Distance-Peak v10.2", mainCanvas.width / 2, mainCanvas.height / 2);
                 ctx.textAlign = "start";
             }
 
-            let totalDetected = 0;
-            let classifiedCount = 0;
-            let unclassifiedCount = 0;
-            let totalIDR = 0;
-            const byType = {};
-            const byCurrency = {};
+            let totalDetected = 0, classifiedCount = 0, unclassifiedCount = 0, totalIDR = 0;
+            const byType = {}, byCurrency = {};
 
             detectedCoins.forEach((coin, index) => {
                 totalDetected++;
@@ -944,8 +590,8 @@
                 ctx.save();
                 ctx.translate(coin.x, coin.y);
                 ctx.beginPath();
-                ctx.ellipse(0, 0, coin.rx, coin.ry, 0, 0, Math.PI * 2);
-                ctx.lineWidth = index === selectedIndex ? 3.5 : 2.2;
+                ctx.ellipse(0, 0, coin.rx, coin.ry, coin.angle || 0, 0, Math.PI * 2);
+                ctx.lineWidth = index === selectedIndex ? 3.5 : 2.8;
                 ctx.strokeStyle = isClassified ? "#10b981" : "#f59e0b";
                 ctx.stroke();
 
@@ -973,10 +619,10 @@
                     unclassifiedCount++;
                 }
 
-                ctx.font = "bold 10px Inter, sans-serif";
+                ctx.font = "bold 11px Inter, sans-serif";
                 const textWidth = ctx.measureText(tagText).width;
-                ctx.fillStyle = "rgba(15, 23, 42, 0.86)";
-                ctx.fillRect(coin.x - textWidth / 2 - 4, coin.y - 8, textWidth + 8, 14);
+                ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+                ctx.fillRect(coin.x - textWidth / 2 - 4, coin.y - 8, textWidth + 8, 15);
                 ctx.fillStyle = isClassified ? "#34d399" : "#fbbf24";
                 ctx.fillText(tagText, coin.x - textWidth / 2, coin.y + 3);
             });
@@ -1003,7 +649,7 @@
 
             const trUnc = document.createElement("tr");
             trUnc.innerHTML = `
-                <td class="py-2 text-amber-400 font-medium">Koin Tidak Terklasifikasi (Tertutup/Tepi)</td>
+                <td class="py-2 text-amber-400 font-medium">Koin Tidak Terklasifikasi (Oval/Tertutup)</td>
                 <td class="py-2 text-center text-amber-400 font-semibold">${unclassifiedCount}</td>
                 <td class="py-2 text-right text-slate-500">-</td>
             `;
@@ -1042,12 +688,13 @@
             rectCtx.clip();
 
             if (currentImage) {
+                const maxR = Math.max(coin.rx, coin.ry);
                 rectCtx.drawImage(
                     currentImage,
-                    Math.max(0, (coin.x - coin.rx) * (currentImage.width / mainCanvas.width)),
-                    Math.max(0, (coin.y - coin.ry) * (currentImage.height / mainCanvas.height)),
-                    (coin.rx * 2) * (currentImage.width / mainCanvas.width),
-                    (coin.ry * 2) * (currentImage.height / mainCanvas.height),
+                    Math.max(0, (coin.x - maxR) * (currentImage.width / mainCanvas.width)),
+                    Math.max(0, (coin.y - maxR) * (currentImage.height / mainCanvas.height)),
+                    (maxR * 2) * (currentImage.width / mainCanvas.width),
+                    (maxR * 2) * (currentImage.height / mainCanvas.height),
                     8, 8, 88, 88
                 );
             }
@@ -1068,13 +715,7 @@
             const cy = (e.clientY - rect.top) * scaleY;
 
             if (addingManualMode) {
-                detectedCoins.push({
-                    x: Math.round(cx),
-                    y: Math.round(cy),
-                    rx: 65,
-                    ry: 20,
-                    code: "UNCLASSIFIED"
-                });
+                detectedCoins.push({ x: Math.round(cx), y: Math.round(cy), rx: 60, ry: 60, angle: 0, code: "UNCLASSIFIED" });
                 selectedIndex = detectedCoins.length - 1;
                 addingManualMode = false;
                 document.getElementById("btnAddCoinManual").textContent = "+ Klik Tambah Koin";
@@ -1084,8 +725,7 @@
 
             for (let i = detectedCoins.length - 1; i >= 0; i--) {
                 const c = detectedCoins[i];
-                const dist = Math.hypot(cx - c.x, cy - c.y);
-                if (dist <= Math.max(c.rx, c.ry)) {
+                if (Math.hypot(cx - c.x, cy - c.y) <= Math.max(c.rx, c.ry)) {
                     selectedIndex = i;
                     renderScene();
                     break;
@@ -1109,13 +749,10 @@
             }
         });
 
-        document.getElementById("selectSceneMode").addEventListener("change", () => {
-            if (currentImage) detectCoinsV10(currentImage);
-        });
-
+        document.getElementById("selectSceneMode").addEventListener("change", () => jalankanDeteksiOtomatis());
         document.getElementById("sliderSens").addEventListener("input", (e) => {
             document.getElementById("lblSens").textContent = `${e.target.value}%`;
-            if (currentImage) detectCoinsV10(currentImage);
+            jalankanDeteksiOtomatis();
         });
 
         document.getElementById("btnDeleteSelected").addEventListener("click", () => {
@@ -1149,21 +786,20 @@
         document.getElementById("uploadInput").addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            currentImageFile = file;
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const img = new Image();
                 img.onload = () => {
                     currentImage = img;
-                    detectCoinsV10(img);
+                    jalankanDeteksiOtomatis();
                 };
                 img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-        document.getElementById("btnSyncBackend").addEventListener("click", () => {
-            deteksiViaBackendPython();
-        });
+        document.getElementById("btnSyncBackend").addEventListener("click", () => deteksiViaBackendPython(false));
 
         document.getElementById("btnAddCatalog").addEventListener("click", async () => {
             const negara = document.getElementById("inpCountry").value.trim();
@@ -1175,31 +811,16 @@
                 return;
             }
             const newKey = `${curr}_${nom}`;
-            COIN_CATALOG[newKey] = {
-                negara: negara,
-                mata_uang: curr,
-                simbol: curr + " ",
-                nominal: nom,
-                kurs_ke_idr: rate
-            };
+            COIN_CATALOG[newKey] = { negara, mata_uang: curr, simbol: curr + " ", nominal: nom, kurs_ke_idr: rate };
             populateSelectOptions();
-
             try {
                 await fetch(`${API_BASE_URL}/api/catalog`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        kode: newKey,
-                        negara: negara,
-                        mata_uang: curr,
-                        simbol: curr + " ",
-                        nominal: nom,
-                        kurs_ke_idr: rate
-                    })
+                    body: JSON.stringify({ kode: newKey, negara, mata_uang: curr, simbol: curr + " ", nominal: nom, kurs_ke_idr: rate })
                 });
             } catch (_) {}
-
-            alert(`Koin ${negara} (${curr} ${nom}) berhasil ditambahkan!`);
+            alert(`Koin ${negara} (${curr} ${nom}) berhasil disimpan ke katalog permanen!`);
         });
 
         document.getElementById("btnExportJSON").addEventListener("click", () => {
@@ -1222,10 +843,11 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                 video.srcObject = stream;
                 video.classList.remove("hidden");
+                currentImageFile = null;
                 setInterval(() => {
                     if (!video.paused && !video.ended) {
                         currentImage = video;
-                        detectCoinsV10(video);
+                        detectCoinsDistancePeakJS(video);
                     }
                 }, 1500);
             } catch (err) {

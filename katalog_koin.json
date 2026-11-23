@@ -1,0 +1,58 @@
+{
+    "ID_IDR_100": {
+        "negara": "Indonesia",
+        "mata_uang": "IDR",
+        "simbol": "Rp ",
+        "nominal": 100,
+        "kurs_idr": 1.0
+    },
+    "ID_IDR_200": {
+        "negara": "Indonesia",
+        "mata_uang": "IDR",
+        "simbol": "Rp ",
+        "nominal": 200,
+        "kurs_idr": 1.0
+    },
+    "ID_IDR_500": {
+        "negara": "Indonesia",
+        "mata_uang": "IDR",
+        "simbol": "Rp ",
+        "nominal": 500,
+        "kurs_idr": 1.0
+    },
+    "ID_IDR_1000": {
+        "negara": "Indonesia",
+        "mata_uang": "IDR",
+        "simbol": "Rp ",
+        "nominal": 1000,
+        "kurs_idr": 1.0
+    },
+    "US_USD_025": {
+        "negara": "Amerika Serikat",
+        "mata_uang": "USD",
+        "simbol": "$",
+        "nominal": 0.25,
+        "kurs_idr": 16200.0
+    },
+    "EU_EUR_100": {
+        "negara": "Uni Eropa",
+        "mata_uang": "EUR",
+        "simbol": "€",
+        "nominal": 1.0,
+        "kurs_idr": 17500.0
+    },
+    "JP_JPY_100": {
+        "negara": "Jepang",
+        "mata_uang": "JPY",
+        "simbol": "¥",
+        "nominal": 100,
+        "kurs_idr": 106.0
+    },
+    "MY_MYR_050": {
+        "negara": "Malaysia",
+        "mata_uang": "MYR",
+        "simbol": "RM ",
+        "nominal": 0.5,
+        "kurs_idr": 3650.0
+    }
+}
